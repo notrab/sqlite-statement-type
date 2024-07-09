@@ -1,4 +1,4 @@
-export enum SQLiteStatementType {
+enum SQLiteStatementType {
   SELECT = "SELECT",
   INSERT = "INSERT",
   UPDATE = "UPDATE",
@@ -12,121 +12,122 @@ export enum SQLiteStatementType {
   ALTER_VIEW = "ALTER VIEW",
   DROP_VIEW = "DROP VIEW",
   PRAGMA = "PRAGMA",
-  BEGIN_TRANSACTION = "BEGIN TRANSACTION",
-  // COMMIT = "COMMIT",
-  // ROLLBACK = "ROLLBACK",
-  // VACUUM = "VACUUM",
-  // ANALYZE = "ANALYZE",
+  BEGIN_TRANSACTION = "BEGIN( TRANSACTION)?",
+  COMMIT = "COMMIT",
+  ROLLBACK = "ROLLBACK",
+  VACUUM = "VACUUM",
+  ANALYZE = "ANALYZE",
   ATTACH = "ATTACH",
   DETACH = "DETACH",
-  // REINDEX = "REINDEX",
-  // SAVEPOINT = "SAVEPOINT",
-  // RELEASE_SAVEPOINT = "RELEASE SAVEPOINT",
-  // ROLLBACK_TO_SAVEPOINT = "ROLLBACK TO SAVEPOINT",
+  REINDEX = "REINDEX",
+  SAVEPOINT = "SAVEPOINT",
+  RELEASE = "RELEASE( SAVEPOINT)?",
   CREATE_TRIGGER = "CREATE TRIGGER",
   DROP_TRIGGER = "DROP TRIGGER",
-  // CREATE_VIRTUAL_TABLE = "CREATE VIRTUAL TABLE",
-  // DROP_VIRTUAL_TABLE = "DROP VIRTUAL TABLE",
-  // CREATE_FOREIGN_KEY = "CREATE FOREIGN KEY",
-  // DROP_FOREIGN_KEY = "DROP FOREIGN KEY",
+  CREATE_VIRTUAL_TABLE = "CREATE VIRTUAL TABLE",
+  DROP_VIRTUAL_TABLE = "DROP VIRTUAL TABLE",
 }
 
 export function isStatement(
   sqlStatement: string,
-  statementType: SQLiteStatementType,
+  statementType: SQLiteStatementType
 ): boolean {
-  const regex = new RegExp(`^\\s*${statementType}\\b`, "i");
+  const regex = new RegExp(`^\\s*(${statementType})\\b`, "i");
+
   return regex.test(sqlStatement.trim());
 }
 
-export function isSelect(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.SELECT);
+export function getStatementType(sql: string): SQLiteStatementType | null {
+  const trimmedSql = sql.trim().toUpperCase();
+
+  for (const [key, value] of Object.entries(SQLiteStatementType)) {
+    const regex = new RegExp(`^${value}\\b`, "i");
+
+    if (regex.test(trimmedSql)) {
+      return SQLiteStatementType[key as keyof typeof SQLiteStatementType];
+    }
+  }
+
+  return null;
 }
 
-export function isInsert(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.INSERT);
-}
+export const isSelect = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.SELECT;
 
-export function isUpdate(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.UPDATE);
-}
+export const isInsert = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.INSERT;
 
-export function isDelete(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.DELETE);
-}
+export const isUpdate = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.UPDATE;
 
-export function isCreateTable(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.CREATE_TABLE);
-}
+export const isDelete = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.DELETE;
 
-export function isAlterTable(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.ALTER_TABLE);
-}
+export const isCreateTable = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.CREATE_TABLE;
 
-export function isDropTable(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.DROP_TABLE);
-}
+export const isAlterTable = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.ALTER_TABLE;
 
-export function isCreateIndex(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.CREATE_INDEX);
-}
+export const isDropTable = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.DROP_TABLE;
 
-export function isDropIndex(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.DROP_INDEX);
-}
+export const isCreateIndex = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.CREATE_INDEX;
 
-export function isCreateView(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.CREATE_VIEW);
-}
+export const isDropIndex = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.DROP_INDEX;
 
-export function isAlterView(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.ALTER_VIEW);
-}
+export const isCreateView = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.CREATE_VIEW;
 
-export function isDropView(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.DROP_VIEW);
-}
+export const isAlterView = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.ALTER_VIEW;
 
-export function isPragma(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.PRAGMA);
-}
+export const isDropView = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.DROP_VIEW;
 
-export function isBeginTransaction(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.BEGIN_TRANSACTION);
-}
+export const isPragma = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.PRAGMA;
 
-export function isAttach(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.ATTACH);
-}
+export const isBeginTransaction = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.BEGIN_TRANSACTION;
 
-export function isDetach(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.DETACH);
-}
+export const isCommit = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.COMMIT;
 
-export function isCreateTrigger(sql: string): boolean {
-  return isStatement(sql, SQLiteStatementType.CREATE_TRIGGER);
-}
+export const isRollback = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.ROLLBACK;
 
-export function isDropTrigger(sqlStatement: string): boolean {
-  return isStatement(sqlStatement, SQLiteStatementType.DROP_TRIGGER);
-}
+export const isVacuum = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.VACUUM;
 
-// export interface SelectDetails {
-//   isRecursive: boolean;
-//   isDistinct: boolean;
-//   usesAll: boolean;
-// }
+export const isAnalyze = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.ANALYZE;
 
-// export function getSelectDetails(sqlStatement: string): SelectDetails | null {
-//   const regex = /^\s*(WITH\s+RECURSIVE\s+)?SELECT\s+(DISTINCT\s+)?(ALL\s+)?\*/i;
-//   const match = regex.exec(sqlStatement.trim());
-//   if (match) {
-//     const isRecursive = !!match[1] && !!match[2];
-//     return {
-//       isRecursive,
-//       isDistinct: !!match[2],
-//       usesAll: !!match[3],
-//     };
-//   }
-//   return null;
-// }
+export const isAttach = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.ATTACH;
+
+export const isDetach = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.DETACH;
+
+export const isReindex = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.REINDEX;
+
+export const isSavepoint = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.SAVEPOINT;
+
+export const isRelease = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.RELEASE;
+
+export const isCreateTrigger = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.CREATE_TRIGGER;
+
+export const isDropTrigger = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.DROP_TRIGGER;
+
+export const isCreateVirtualTable = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.CREATE_VIRTUAL_TABLE;
+
+export const isDropVirtualTable = (sql: string) =>
+  getStatementType(sql) === SQLiteStatementType.DROP_VIRTUAL_TABLE;
